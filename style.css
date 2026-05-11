@@ -1,0 +1,38 @@
+.vimeo-facade {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: #000;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.facade-poster {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.facade-play-button {
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s ease;
+}
+
+.vimeo-facade:hover .facade-play-button {
+    transform: scale(1.1);
+}
+
+.vimeo-facade iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
