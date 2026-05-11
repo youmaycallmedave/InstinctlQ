@@ -41,7 +41,7 @@ function loadBgVideo(el) {
 document.querySelectorAll('.vimeo_lazy-bg').forEach(function (el) {
     ScrollTrigger.create({
         trigger: el,
-        start: 'top bottom+=200',
+        start: 'top bottom+=1500',
         once: true,
         onEnter: function () {
             loadBgVideo(el);
