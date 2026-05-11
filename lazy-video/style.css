@@ -1,0 +1,46 @@
+.vimeo_lazy-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: #000;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vimeo_lazy-wrap iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.vimeo_lazy-poster {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease;
+}
+
+.vimeo_lazy-play {
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s ease;
+}
+
+.vimeo_lazy-wrap:hover .vimeo_lazy-play {
+    transform: scale(1.1);
+}
+
+.vimeo_lazy-bg {
+    cursor: default;
+}
+
+.vimeo_lazy-bg iframe {
+    pointer-events: none;
+}
