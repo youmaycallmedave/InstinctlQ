@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vimeo Facade</title>
+  <title>Vimeo Lazy</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="vimeo-facade" data-vimeo-id="76979871">
-    <img src="https://picsum.photos/1280/720" class="facade-poster" alt="Video Preview">
-    <div class="facade-play-button">
+  <div class="vimeo_lazy-wrap" data-vimeo-id="76979871">
+    <img src="https://picsum.photos/1280/720" class="vimeo_lazy-poster" alt="Video Preview">
+    <div class="vimeo_lazy-play">
       <svg viewBox="0 0 24 24" width="60" height="60"><path fill="#fff" d="M8 5v14l11-7z"/></svg>
     </div>
+  </div>
+
+  <div class="vimeo_lazy-wrap vimeo_lazy-bg" data-vimeo-id="76979871">
+    <img src="https://picsum.photos/1280/720" class="vimeo_lazy-poster" alt="">
   </div>
 
   <script src="script.js"></script>
