@@ -10,8 +10,15 @@ document.addEventListener('click', function (e) {
     iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
     iframe.setAttribute('allowfullscreen', '');
 
-    wrapper.innerHTML = '';
     wrapper.appendChild(iframe);
+
+    var play = wrapper.querySelector('.vimeo_lazy-play');
+    if (play) play.style.display = 'none';
+
+    iframe.addEventListener('load', function () {
+        var poster = wrapper.querySelector('.vimeo_lazy-poster');
+        if (poster) poster.style.opacity = '0';
+    });
 });
 
 function loadBgVideo(el) {
