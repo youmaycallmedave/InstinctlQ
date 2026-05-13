@@ -1,0 +1,75 @@
+.slider_progress-in {
+    width: 0%;
+}
+
+.slider_progress-in.is-animating {
+    animation: progress-fill 5s linear forwards;
+}
+
+@keyframes progress-fill {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+.swiper-slide.is-contributor {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media screen and (min-width: 992px) {
+    .swiper-slide.is-contributor.is-active {
+        width: 37rem !important;
+    }
+
+
+    .swiper-slide.is-contributor .contributor_visual {
+        height: 100%;
+        transform: translateX(15%) scale(0.9);
+        transform-origin: right bottom;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .swiper-slide.is-contributor.is-active .contributor_visual {
+        height: 115% !important;
+        transform: translateX(0%) scale(1);
+        transform-origin: center bottom;
+    }
+
+    /* Inactive slide content */
+    .swiper-slide.is-contributor .contributor_content {
+        transform: scale(0.8);
+        transform-origin: left top;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Active slide content */
+    .swiper-slide.is-contributor.is-active .contributor_content {
+        transform: scale(1);
+    }
+
+}
+
+
+/* Suppress CSS transitions during silent loop jump */
+.swiper.no-transitions * {
+    transition: none !important;
+}
+
+/* Drag cursor */
+.swiper-block.is-contributor .swiper {
+    cursor: grab;
+}
+
+.swiper-block.is-contributor .swiper-wrapper {
+    cursor: grab;
+}
+
+.swiper-block.is-contributor .swiper.is-dragging,
+.swiper-block.is-contributor .swiper-wrapper.is-dragging {
+    cursor: grabbing;
+}
