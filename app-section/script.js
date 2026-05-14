@@ -40,11 +40,13 @@ document.querySelectorAll(".app_timeline-item").forEach((item, i) => {
   });
 });
 
+
 const anchorWrap = document.querySelector(".app_anchor-wrap");
 const anchors = document.querySelectorAll(".app_anchor");
 const timelineItems = document.querySelectorAll(".app_timeline-item");
 
 gsap.set(".app_timeline-item-line", { opacity: 0.2 });
+
 
 if (anchorWrap && anchors.length) {
   let currentAnchor = -1;
