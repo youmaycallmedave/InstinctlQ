@@ -1,80 +1,115 @@
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get('session_id');
+const visibleEmail = document.querySelector('[data-form-visible-email]');
+  const hiddenEmail = document.querySelector('[data-form-hidden-email]');
+  const visibleBtn = document.querySelector('[data-form-visible-btn]');
+  const hiddenBtn = document.querySelector('[data-form-hidden-btn]');
+  const hiddenForm = document.querySelector('[data-form-hidden]');
+  const successBlock = document.querySelector('.hero_join-form-success');
 
-  if (!sessionId) {
-    document.querySelectorAll('.no-payed-user').forEach(el => el.classList.remove('hide'));
-    document.querySelectorAll('.payed-user').forEach(el => el.remove());
-    document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
-    return;
+  visibleEmail.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      visibleBtn.click();
+    }
+  });
+
+  const visibleForm = visibleEmail.closest('form');
+  if (visibleForm) {
+    visibleForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
   }
 
-  document.querySelectorAll('.payed-user-wait').forEach(el => el.classList.remove('hide'));
+  document.addEventListener('submit', (e) => {
+    if (e.target && e.target.contains(visibleEmail) && !e.target.contains(hiddenBtn)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
 
-  // ========== FETCH DATA FROM WEBHOOK ==========
-  const WEBHOOK_URL = 'https://celerart.app.n8n.cloud/webhook/onboarding-form-request';
+  visibleEmail.addEventListener('input', () => {
+    hiddenEmail.value = visibleEmail.value;
+  });
 
-  fetch(WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ session_id: sessionId })
-  })
-    .then(function (response) {
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      return response.json();
-    })
-    .then(function (data) {
-      // ========== FETCH DATA END ==========
-      console.log('Webhook response:', data);
+  let submitted = false;
 
-      document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
+  visibleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (submitted) return;
 
-      // ========== AUTO-FILL DATA START ==========
-      var readonlyFields = {
-        'First-name': data['firstName'],
-        'Last-name': data['lastName'],
-        'Email': data['email'],
-        'business-facility-name': data['businessName'],
-        'Selected-plan': data['plan']
-      };
+    const email = visibleEmail.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-      Object.entries(readonlyFields).forEach(function (entry) {
-        var field = document.getElementById(entry[0]);
-        if (field && entry[1]) field.value = entry[1];
-      });
-      // ========== AUTO-FILL DATA END ==========
+    if (!email || !emailRegex.test(email)) {
+      visibleEmail.focus();
+      visibleEmail.setCustomValidity('Please enter a valid email (e.g. name@example.com)');
+      visibleEmail.reportValidity();
+      visibleEmail.addEventListener('input', () => visibleEmail.setCustomValidity(''), { once: true });
+      return;
+    }
 
-      document.querySelectorAll('[data-readonly="true"]').forEach(function (field) {
-        field.readOnly = true;
-        field.classList.add('is-readonly');
-      });
+    submitted = true;
+    visibleBtn.classList.add('is-green');
+    visibleBtn.querySelector('.button_text').textContent = 'Joining';
+    visibleBtn.querySelector('.button_bg-pixel-hover')?.remove();
 
-      document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
+    const bobr = document.querySelector('.hero_join-form1-btn-bobr');
+    if (bobr) {
+      bobr.animate([
+        { offset: 0,   transform: 'translateY(0) rotate(0deg)',      easing: 'ease-in-out' },
+        { offset: 1/3, transform: 'translateY(-2rem) rotate(0deg)',   easing: 'ease-in-out' },
+        { offset: 1/2, transform: 'translateY(-2rem) rotate(25deg)',  easing: 'ease-in-out' },
+        { offset: 2/3, transform: 'translateY(-2rem) rotate(-25deg)', easing: 'ease-in-out' },
+        { offset: 1,   transform: 'translateY(0) rotate(0deg)' },
+      ], { duration: 3000, fill: 'forwards' });
+    }
 
-      // ========== FORM SUBMIT ==========
-      var form = document.getElementById('wf-form-Onboarding');
-      if (form) {
-        form.addEventListener('submit', function () {
-          var formData = new FormData(form);
-          var payload = {};
-          formData.forEach(function (value, key) { payload[key] = value; });
-          payload['session_id'] = sessionId;
+    const iconStart = visibleBtn.querySelector('.button_ic-wrap.is-start');
+    const iconEnd = visibleBtn.querySelector('.button_ic-wrap.is-end');
+    const iconTransition = 'width 0.4s ease, overflow 0.4s ease';
 
-          fetch('https://celerart.app.n8n.cloud/webhook/onboarding-form-submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(payload)
-          }).catch(function (err) {
-            console.error('Form submit webhook failed:', err);
-          });
+    if (iconStart) {
+      iconStart.style.transition = iconTransition;
+      iconStart.style.overflow = 'hidden';
+      iconStart.style.width = '0rem';
+    }
+    if (iconEnd) {
+      iconEnd.style.overflow = 'hidden';
+      iconEnd.style.width = '0rem';
+      iconEnd.style.display = 'flex';
+    }
+
+    setTimeout(() => {
+      if (iconEnd) {
+        iconEnd.style.transition = iconTransition;
+        iconEnd.style.width = '1.5rem';
+      }
+      visibleBtn.querySelector('.button_text').textContent = 'Joined Waitlist';
+      visibleBtn.style.pointerEvents = 'none';
+      visibleBtn.style.cursor = 'default';
+
+      const fieldWrap = document.querySelector('.hero_join-form-field-wrap');
+      if (fieldWrap) {
+        const currentWidth = fieldWrap.getBoundingClientRect().width;
+        fieldWrap.style.width = currentWidth + 'px';
+        fieldWrap.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+          fieldWrap.style.transition = 'width 0.5s ease';
+          fieldWrap.style.width = '0px';
         });
       }
-      // ========== FORM SUBMIT END ==========
-    })
-    .catch(function (err) {
-      console.error('Webhook fetch failed:', err);
-      document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
-      document.querySelectorAll('.payed-user').forEach(el => el.remove());
-      document.querySelectorAll('.payed-user-denied').forEach(el => el.classList.remove('hide'));
-    });
-})();
+
+      if (successBlock) {
+        const skipLink = successBlock.querySelector('a');
+        if (skipLink) {
+          skipLink.href = 'https://typesafeai.typeform.com/waitlist#email=' + encodeURIComponent(email);
+          skipLink.target = '_blank';
+        }
+        successBlock.style.transition = 'opacity 0.5s ease';
+        successBlock.style.opacity = '1';
+      }
+    }, 3000);
+
+    hiddenBtn.click();
+  });
