@@ -12,7 +12,7 @@
   document.querySelectorAll('.payed-user-wait').forEach(el => el.classList.remove('hide'));
 
   // ========== FETCH DATA FROM WEBHOOK ==========
-  const WEBHOOK_URL = 'https://celerart.app.n8n.cloud/webhook/contact-form-submit';
+  const WEBHOOK_URL = 'https://celerart.app.n8n.cloud/webhook/onboarding-form-request';
 
   fetch(WEBHOOK_URL, {
     method: 'POST',
