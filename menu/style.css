@@ -7,21 +7,32 @@
   }
 
   /* Outer — видны по умолчанию */
-  .navbar1_logo-link,
-  .navbar1_menu-buttons.is-main {
-    max-width: 300px;
-    overflow: hidden;
+  .navbar1_logo-link {
     opacity: 1;
     pointer-events: auto;
-    transition: max-width 1s ease 0.3s, opacity 1s ease 0.3s;
+    transform: translateX(0);
+    transition: transform 1s ease 0.3s, opacity 1s ease 0.3s;
   }
 
-  .navbar1_component.is-active .navbar1_logo-link,
-  .navbar1_component.is-active .navbar1_menu-buttons.is-main {
-    max-width: 0;
+  .navbar1_menu-buttons.is-main {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    transition: transform 1s ease 0.3s, opacity 1s ease 0.3s;
+  }
+
+  .navbar1_component.is-active .navbar1_logo-link {
+    transform: translateX(20rem);
     opacity: 0;
     pointer-events: none;
-    transition: max-width 1s ease, opacity 1s ease;
+    transition: transform 1s ease, opacity 1s ease;
+  }
+
+  .navbar1_component.is-active .navbar1_menu-buttons.is-main {
+    transform: translateX(-20rem);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 1s ease, opacity 1s ease;
   }
 
   /* Inner — скрыты по умолчанию */
@@ -39,7 +50,7 @@
     max-width: 300px;
     opacity: 1;
     pointer-events: auto;
-    transition: max-width 1s ease, opacity 1s ease;
+    transition: max-width 1s ease 0.5s, opacity 1s ease 0.5s;
   }
 
    .navbar1_component.is-active .navbar1_menu-in {
