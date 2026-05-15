@@ -3,14 +3,12 @@
   const sessionId = params.get('session_id');
 
   if (!sessionId) {
-    // Нет session_id — показываем контент для незаплативших, убираем остальное
     document.querySelectorAll('.no-payed-user').forEach(el => el.classList.remove('hide'));
     document.querySelectorAll('.payed-user').forEach(el => el.remove());
     document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
     return;
   }
 
-  // Есть session_id — показываем лоадер, делаем запрос
   document.querySelectorAll('.payed-user-wait').forEach(el => el.classList.remove('hide'));
 
   // ========== FETCH DATA FROM WEBHOOK ==========
@@ -29,7 +27,6 @@
       // ========== FETCH DATA END ==========
       console.log('Webhook response:', data);
 
-      // Убираем лоадер
       document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
 
       // ========== AUTO-FILL DATA START ==========
@@ -52,13 +49,12 @@
         field.classList.add('is-readonly');
       });
 
-      // Показываем форму
       document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
     })
     .catch(function (err) {
       console.error('Webhook fetch failed:', err);
-      // Убираем лоадер даже при ошибке, показываем форму пустой
       document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
-      document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
+      document.querySelectorAll('.payed-user').forEach(el => el.remove());
+      document.querySelectorAll('.payed-user-denied').forEach(el => el.classList.remove('hide'));
     });
 })();
