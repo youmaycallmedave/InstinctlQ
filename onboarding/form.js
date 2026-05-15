@@ -60,7 +60,7 @@
           formData.forEach(function (value, key) { payload[key] = value; });
           payload['session_id'] = sessionId;
 
-          fetch('https://celerart.app.n8n.cloud/webhook/onboarding-form-submit', {
+          fetch('https://celerart.app.n8n.cloud/webhook-test/onboarding-form-submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams(payload)
