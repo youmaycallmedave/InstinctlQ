@@ -133,7 +133,7 @@
   const mainEmail = document.getElementById('Email');
   if (mainEmail) attachEmailValidation(mainEmail);
 
-  // Для новых участников — через делегирование на list
+  // Delegated validation for member email inputs
   if (list) {
     list.addEventListener('blur', function (e) {
       if (e.target && e.target.name === 'Person-Email') {
@@ -155,7 +155,7 @@
   }
   // ========== EMAIL VALIDATION END ==========
 
-  // Обновляем лимит при смене плана (актуально для ручного заполнения без session_id)
+  // Plan change guard — prevent switching to a plan that exceeds current member count
   const planField = document.getElementById('Selected-plan');
   if (planField) {
     let prevPlan = planField.value;
@@ -248,7 +248,6 @@
 
       document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
 
-      // После автозаполнения плана обновляем состояние кнопки
       updateAddBtn();
 
       // ========== FORM SUBMIT ==========
