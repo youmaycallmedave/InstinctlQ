@@ -50,6 +50,26 @@
       });
 
       document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
+
+      // ========== FORM SUBMIT ==========
+      var form = document.getElementById('wf-form-Onboarding');
+      if (form) {
+        form.addEventListener('submit', function () {
+          var formData = new FormData(form);
+          var payload = {};
+          formData.forEach(function (value, key) { payload[key] = value; });
+          payload['session_id'] = sessionId;
+
+          fetch('https://celerart.app.n8n.cloud/webhook/onboarding-form-submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(payload)
+          }).catch(function (err) {
+            console.error('Form submit webhook failed:', err);
+          });
+        });
+      }
+      // ========== FORM SUBMIT END ==========
     })
     .catch(function (err) {
       console.error('Webhook fetch failed:', err);
