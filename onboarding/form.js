@@ -14,7 +14,7 @@
   document.querySelectorAll('.payed-user-wait').forEach(el => el.classList.remove('hide'));
 
   // ========== FETCH DATA FROM WEBHOOK ==========
-  const WEBHOOK_URL = 'https://celerart.app.n8n.cloud/webhook-test/contact-form-submit';
+  const WEBHOOK_URL = 'https://celerart.app.n8n.cloud/webhook/contact-form-submit';
 
   fetch(WEBHOOK_URL, {
     method: 'POST',
@@ -27,17 +27,18 @@
     })
     .then(function (data) {
       // ========== FETCH DATA END ==========
+      console.log('Webhook response:', data);
 
       // Убираем лоадер
       document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
 
       // ========== AUTO-FILL DATA START ==========
       var readonlyFields = {
-        'First-name': data['First-name'],
-        'Last-name': data['Last-name'],
-        'Email': data['Email'],
-        'business-facility-name': data['business-facility-name'],
-        'Selected-plan': data['Selected-plan']
+        'First-name': data['firstName'],
+        'Last-name': data['lastName'],
+        'Email': data['email'],
+        'business-facility-name': data['businessName'],
+        'Selected-plan': data['plan']
       };
 
       Object.entries(readonlyFields).forEach(function (entry) {
