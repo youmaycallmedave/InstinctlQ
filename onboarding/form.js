@@ -1,5 +1,9 @@
 (function () {
-  const PLAN_LIMITS = { Small: 15, Medium: 30, Large: 50 };
+  const PLAN_LIMITS = {
+    'Small (1-15 staff)':   15,
+    'Medium (16-30 staff)': 30,
+    'Large (31–50 staff)':  50,
+  };
 
   // ========== STYLES ==========
   var style = document.createElement('style');
@@ -76,10 +80,10 @@
       const role     = item.querySelector('select[name="Person-Role"]');
       const usertype = item.querySelector('select[name="Person-Usertype"]');
       members.push({
-        name:     name     ? name.value.trim()  : '',
-        email:    email    ? email.value.trim() : '',
-        role:     role     ? role.value         : '',
-        usertype: usertype ? usertype.value     : '',
+        name:   name     ? name.value.trim()  : '',
+        email:  email    ? email.value.trim() : '',
+        role:   role     ? role.value         : '',
+        access: usertype ? usertype.value     : '',
       });
     });
     resultInput.value = JSON.stringify(members, null, 2);
@@ -179,6 +183,18 @@
   tabStyle.textContent = '.contact_add-file { display: none; }';
   document.head.appendChild(tabStyle);
 
+  var savedCsvData = null;
+
+  function resetManualList() {
+    if (!list || !template) return;
+    list.querySelectorAll('.contact_add-group-item').forEach(function (item) { item.remove(); });
+    var fresh = template.cloneNode(true);
+    fresh.addEventListener('input', collectJSON);
+    fresh.addEventListener('change', collectJSON);
+    attachDeleteBtn(fresh);
+    list.appendChild(fresh);
+  }
+
   document.addEventListener('click', function (e) {
     var toggle = e.target.closest('.tabs_nav-toggle');
     if (!toggle) return;
@@ -188,8 +204,114 @@
     var isActive = toggle.classList.toggle('is-active');
     addWrap.style.display = isActive ? 'none' : '';
     addFile.style.display = isActive ? 'block' : 'none';
+
+    if (isActive) {
+      // Переход на CSV: сбрасываем ручной список, восстанавливаем сохранённые CSV данные
+      resetManualList();
+      if (resultInput) resultInput.value = savedCsvData || '';
+      addWrap.querySelectorAll('[required]').forEach(function (f) { f.dataset.wasRequired = 'true'; });
+      addWrap.querySelectorAll('[data-was-required]').forEach(function (f) { f.removeAttribute('required'); });
+    } else {
+      // Переход на ручной: сохраняем CSV данные, очищаем resultInput
+      if (resultInput) savedCsvData = resultInput.value || null;
+      resetManualList();
+      if (resultInput) resultInput.value = '';
+      addWrap.querySelectorAll('[data-was-required]').forEach(function (f) { f.setAttribute('required', ''); });
+    }
   });
   // ========== TABS TOGGLE END ==========
+
+  // ========== FILE PARSER (CSV / XLS / XLSX) ==========
+  var csvFileInput = document.querySelector('.contact_add-file .w-file-upload-input')
+                  || document.querySelector('.contact_add-file input[type="file"]');
+
+  function splitCSVRow(row, delimiter) {
+    var result = [];
+    var current = '';
+    var inQuotes = false;
+    for (var i = 0; i < row.length; i++) {
+      var c = row[i];
+      if (c === '"' && row[i + 1] === '"') { current += '"'; i++; }
+      else if (c === '"') { inQuotes = !inQuotes; }
+      else if (c === delimiter && !inQuotes) { result.push(current.trim()); current = ''; }
+      else { current += c; }
+    }
+    result.push(current.trim());
+    return result;
+  }
+
+  function parseCSVText(text) {
+    var lines = text.split(/\r?\n/).filter(function (l) { return l.trim(); });
+    if (lines.length < 2) { alert('CSV needs at least a header and one data row'); return null; }
+
+    var candidates = [',', ';', '\t', '|'];
+    var delimiter = candidates.reduce(function (best, d) {
+      return lines[0].split(d).length > lines[0].split(best).length ? d : best;
+    });
+
+    var rawHeaders = splitCSVRow(lines[0], delimiter);
+
+    var keyPatterns = [
+      { key: 'name',     pattern: /^(full.?name|name)$/i },
+      { key: 'email',    pattern: /^e.?mail$/i },
+      { key: 'role',     pattern: /^role$/i },
+      { key: 'access',   pattern: /^(access|usertype|user.?type)$/i },
+    ];
+
+    var headers = rawHeaders.map(function (h) {
+      var match = keyPatterns.find(function (kp) { return kp.pattern.test(h.trim()); });
+      return match ? match.key : h.trim().toLowerCase().replace(/\s+/g, '_');
+    });
+
+    // Только Users-секция (строки с количеством колонок = заголовку)
+    var colCount = rawHeaders.length;
+    return lines.slice(1).filter(function (line) {
+      return splitCSVRow(line, delimiter).length === colCount;
+    }).map(function (line) {
+      var cols = splitCSVRow(line, delimiter);
+      var obj = {};
+      headers.forEach(function (h, i) { obj[h] = cols[i] || ''; });
+      return obj;
+    }).filter(function (row) { return Object.values(row).some(function (v) { return v.trim(); }); });
+
+    // Все секции (раскомментировать если нужно передавать все данные из файла)
+    // return lines.slice(1).map(function (line) {
+    //   var cols = splitCSVRow(line, delimiter);
+    //   var obj = {};
+    //   rawHeaders.forEach(function (h, i) { obj[h] = cols[i] || ''; });
+    //   return obj;
+    // }).filter(function (row) { return Object.values(row).some(function (v) { return v.trim(); }); });
+  }
+
+  if (csvFileInput && resultInput) {
+    csvFileInput.addEventListener('change', function () {
+      var file = csvFileInput.files && csvFileInput.files[0];
+      if (!file) {
+        savedCsvData = null;
+        if (resultInput) resultInput.value = '';
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var data = parseCSVText(e.target.result);
+        if (data) {
+          resultInput.value = JSON.stringify(data);
+          console.log('Parsed CSV:', data);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Удаление файла через Webflow кнопку — change не срабатывает, слушаем кнопку
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.w-file-remove-link')) {
+        savedCsvData = null;
+        resultInput.value = '';
+      }
+    });
+  }
+  // ========== FILE PARSER END ==========
 
   // ========== SESSION ==========
   const params = new URLSearchParams(window.location.search);
@@ -199,6 +321,8 @@
     document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
     var successText = document.querySelector('.success-form-change');
     if (successText) successText.textContent = 'We will create your staff accounts soon. If in 24 hours your team still can\'t log in, please contact us at';
+    var successBtn = document.querySelector('.form_success-btn');
+    if (successBtn) successBtn.style.display = 'none';
     return;
   }
 
@@ -232,7 +356,16 @@
 
       Object.entries(readonlyFields).forEach(function (entry) {
         var field = document.getElementById(entry[0]);
-        if (field && entry[1]) field.value = entry[1];
+        if (!field || !entry[1]) return;
+        if (field.tagName === 'SELECT') {
+          var val = entry[1].toLowerCase();
+          var match = Array.from(field.options).find(function (opt) {
+            return opt.value.toLowerCase().indexOf(val) === 0 || val.indexOf(opt.value.toLowerCase()) === 0;
+          });
+          if (match) field.value = match.value;
+        } else {
+          field.value = entry[1];
+        }
       });
       // ========== AUTO-FILL DATA END ==========
 
@@ -247,6 +380,15 @@
       });
 
       document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
+
+      // Устанавливаем ссылку на кнопку Log In из branch_name и показываем её
+      if (data['branch_name']) {
+        var loginUrl = 'https://' + data['branch_name'] + '-instinctiq.talentlms.com/';
+        var successBtnWrap = document.querySelector('.form_success-btn');
+        var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
+        if (loginBtn) loginBtn.href = loginUrl;
+        if (successBtnWrap) successBtnWrap.style.display = '';
+      }
 
       updateAddBtn();
 
@@ -263,9 +405,10 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams(payload)
-          }).catch(function (err) {
-            console.error('Form submit webhook failed:', err);
-          });
+          })
+            .then(function (res) { return res.json(); })
+            .then(function (res) { console.log('Form submit response:', res); })
+            .catch(function (err) { console.error('Form submit webhook failed:', err); });
         });
       }
       // ========== FORM SUBMIT END ==========
