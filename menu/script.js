@@ -1,5 +1,3 @@
-gsap.registerPlugin(ScrollTrigger);
-
 function getPositionedParent(el) {
   let p = el.parentElement;
   while (p) {
@@ -75,7 +73,7 @@ function setup() {
         .to(mainButtons, { right:    btnRightTo,  duration: dur, ease }, 0)
         .to(linkLogo,    { maxWidth: linkLogoW,   duration: dur, ease }, 0)
         .to(inButtons,   { maxWidth: inButtonsW,  duration: dur, ease }, 0)
-        .to(logoText,    { opacity: 0, scale: 0, transformOrigin: "left center", duration: 0.5, ease: "power1.inOut" }, 0);
+        .to(logoText,    { opacity: 0, scale: 0, transformOrigin: "left center", duration: 0.5, ease: "none" }, 0);
     },
     onLeaveBack: () => {
       navbar.classList.remove("is-active");
@@ -84,7 +82,7 @@ function setup() {
         .to(mainButtons, { right:    btnRightFrom, duration: dur, ease }, 0)
         .to(linkLogo,    { maxWidth: 0,            duration: dur, ease }, 0)
         .to(inButtons,   { maxWidth: 0,            duration: dur, ease }, 0)
-        .to(logoText,    { opacity: 1, scale: 1, transformOrigin: "left center", duration: 0.5, ease: "power1.inOut" }, 0.4);
+        .to(logoText,    { opacity: 1, scale: 1, transformOrigin: "left center", duration: 0.5, ease: "none" }, 0.4);
     },
   });
 }
