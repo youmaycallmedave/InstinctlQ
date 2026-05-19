@@ -382,9 +382,8 @@
       document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
 
       // Устанавливаем ссылку на кнопку Log In из branch_name и показываем её
-      var branchDomain = data['branch_name'] || (data['businessName'] ? data['businessName'].toLowerCase().replace(/\s+/g, '') + '-instinctiq.talentlms.com' : null);
-      if (branchDomain) {
-        var loginUrl = 'https://' + branchDomain + '/';
+      if (data['branch_name']) {
+        var loginUrl = 'https://' + data['branch_name'] + '/';
         var successBtnWrap = document.querySelector('.form_success-btn');
         var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
         if (loginBtn) loginBtn.href = loginUrl;
@@ -408,7 +407,16 @@
             body: new URLSearchParams(payload)
           })
             .then(function (res) { return res.json(); })
-            .then(function (res) { console.log('Form submit response:', res); })
+            .then(function (res) {
+              console.log('Form submit response:', res);
+              if (res['branch_name']) {
+                var loginUrl = 'https://' + res['branch_name'] + '-instinctiq.talentlms.com/';
+                var successBtnWrap = document.querySelector('.form_success-btn');
+                var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
+                if (loginBtn) loginBtn.href = loginUrl;
+                if (successBtnWrap) successBtnWrap.style.display = '';
+              }
+            })
             .catch(function (err) { console.error('Form submit webhook failed:', err); });
         });
       }
