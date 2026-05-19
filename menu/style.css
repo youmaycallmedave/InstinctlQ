@@ -3,7 +3,6 @@
       flex: 1 1 auto;
     }
 
-    /* Inner — скрыты и схлопнуты, пространства не занимают */
     .navbar1_link-logo,
     .navbar1_menu-buttons.is-in {
       max-width: 0;
