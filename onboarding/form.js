@@ -382,8 +382,9 @@
       document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
 
       // Устанавливаем ссылку на кнопку Log In из branch_name и показываем её
-      if (data['branch_name']) {
-        var loginUrl = 'https://' + data['branch_name'] + '-instinctiq.talentlms.com/';
+      var branchDomain = data['branch_name'] || (data['businessName'] ? data['businessName'].toLowerCase().replace(/\s+/g, '') + '-instinctiq.talentlms.com' : null);
+      if (branchDomain) {
+        var loginUrl = 'https://' + branchDomain + '/';
         var successBtnWrap = document.querySelector('.form_success-btn');
         var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
         if (loginBtn) loginBtn.href = loginUrl;
