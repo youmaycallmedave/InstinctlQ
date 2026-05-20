@@ -12,11 +12,30 @@
     '  opacity: 0.5;',
     '  cursor: not-allowed;',
     '  pointer-events: none;',
-    '}',
-    '.contact_add-btn.is-disabled {',
     '  position: relative;',
     '}',
     '.contact_add-btn.is-disabled::after {',
+    '  content: attr(data-tooltip);',
+    '  position: absolute;',
+    '  top: 50%;',
+    '  left: calc(100% + 8px);',
+    '  transform: translateY(-50%);',
+    '  background: #1a1a1a;',
+    '  color: #fff;',
+    '  font-size: 13px;',
+    '  line-height: 1.4;',
+    '  white-space: nowrap;',
+    '  padding: 6px 10px;',
+    '  border-radius: 6px;',
+    '  pointer-events: none;',
+    '  z-index: 100;',
+    '}',
+    '.contact_form-row-delete.is-disabled {',
+    '  opacity: 0.5;',
+    '  cursor: not-allowed;',
+    '  position: relative;',
+    '}',
+    '.contact_form-row-delete.is-disabled:hover::after {',
     '  content: attr(data-tooltip);',
     '  position: absolute;',
     '  top: 50%;',
@@ -49,6 +68,7 @@
     initial.addEventListener('change', collectJSON);
     attachDeleteBtn(initial);
     list.appendChild(initial);
+    updateDeleteBtns();
   }
 
   function getCurrentPlan() {
@@ -90,12 +110,31 @@
     updateAddBtn();
   }
 
+  function updateDeleteBtns() {
+    if (!list) return;
+    var items = list.querySelectorAll('.contact_add-group-item');
+    items.forEach(function (item) {
+      var btn = item.querySelector('.contact_form-row-delete');
+      if (btn) {
+        if (items.length <= 1) {
+          btn.classList.add('is-disabled');
+          btn.setAttribute('data-tooltip', 'Minimum 1 user required');
+        } else {
+          btn.classList.remove('is-disabled');
+          btn.removeAttribute('data-tooltip');
+        }
+      }
+    });
+  }
+
   function attachDeleteBtn(item) {
     const deleteBtn = item.querySelector('.contact_form-row-delete');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', function () {
+        if (deleteBtn.classList.contains('is-disabled')) return;
         item.remove();
         collectJSON();
+        updateDeleteBtns();
       });
     }
   }
@@ -113,8 +152,61 @@
       attachDeleteBtn(clone);
       list.appendChild(clone);
       collectJSON();
+      updateDeleteBtns();
     });
   }
+
+  // ========== FORM STAFF VALIDATION ==========
+  var submitErrorMsg = null;
+
+  function showSubmitError(text) {
+    if (!submitErrorMsg) {
+      submitErrorMsg = document.createElement('div');
+      submitErrorMsg.className = 'contact_submit-error';
+      submitErrorMsg.style.cssText = 'color:#c00;font-size:14px;margin-top:8px;';
+      var btnWrap = document.querySelector('.contact_form-btn-wrap');
+      if (btnWrap) btnWrap.appendChild(submitErrorMsg);
+    }
+    submitErrorMsg.textContent = text;
+    submitErrorMsg.style.display = '';
+  }
+
+  function hideSubmitError() {
+    if (submitErrorMsg) submitErrorMsg.style.display = 'none';
+  }
+
+  function ensurePeriod(text) {
+    if (!text) return text;
+    return /[.!?]$/.test(text.trim()) ? text : text.trim() + '.';
+  }
+
+  var earlyForm = document.getElementById('wf-form-Onboarding');
+  if (earlyForm) {
+    earlyForm.addEventListener('submit', function (e) {
+      var csvMode = document.querySelector('.contact_add-file') &&
+                    document.querySelector('.contact_add-file').style.display !== 'none';
+      var value = resultInput ? resultInput.value.trim() : '';
+      var valid = false;
+
+      try {
+        var parsed = JSON.parse(value);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          valid = parsed.some(function (u) { return (u.email || u.name || '').trim(); });
+        }
+      } catch (err) { valid = false; }
+
+      if (!valid) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        showSubmitError(csvMode
+          ? 'The file you uploaded has no user information. Please fill it in and upload again.'
+          : 'Please add at least one team member before submitting.');
+        return;
+      }
+      hideSubmitError();
+    }, true);
+  }
+  // ========== FORM STAFF VALIDATION END ==========
 
   // ========== EMAIL VALIDATION ==========
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -193,6 +285,7 @@
     fresh.addEventListener('change', collectJSON);
     attachDeleteBtn(fresh);
     list.appendChild(fresh);
+    updateDeleteBtns();
   }
 
   document.addEventListener('click', function (e) {
@@ -242,7 +335,7 @@
 
   function parseCSVText(text) {
     var lines = text.split(/\r?\n/).filter(function (l) { return l.trim(); });
-    if (lines.length < 2) { alert('CSV needs at least a header and one data row'); return null; }
+    if (lines.length < 2) return null;
 
     var candidates = [',', ';', '\t', '|'];
     var delimiter = candidates.reduce(function (best, d) {
@@ -347,7 +440,7 @@
         document.querySelectorAll('.payed-user').forEach(function (el) { el.remove(); });
         document.querySelectorAll('.payed-user-denied').forEach(function (el) { el.classList.remove('hide'); });
         var errorText = document.querySelector('.contact_error-text');
-        if (errorText && errMsg) errorText.textContent = errMsg;
+        if (errorText && errMsg) errorText.textContent = ensurePeriod(errMsg);
         return;
       }
       var data = result.body;
@@ -406,6 +499,11 @@
       var form = document.getElementById('wf-form-Onboarding');
       if (form) {
         form.addEventListener('submit', function () {
+          var successText = document.querySelector('.success-form-change');
+          var successBtnWrap = document.querySelector('.form_success-btn');
+          if (successText) successText.textContent = 'Please wait, we\'re setting up your account...';
+          if (successBtnWrap) successBtnWrap.style.display = 'none';
+
           var formData = new FormData(form);
           var payload = {};
           formData.forEach(function (value, key) { payload[key] = value; });
@@ -428,17 +526,25 @@
               var successBtnWrap = document.querySelector('.form_success-btn');
               var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
               var errorText = document.querySelector('.contact_error-text');
+              var successText = document.querySelector('.success-form-change');
 
               if (httpStatus === 502 || httpStatus === 500 || httpStatus === 422) {
-                if (errorText) errorText.textContent = res.message || res.error || 'Something went wrong. Please contact us at support@instinctiq.com';
+                var msg = ensurePeriod(res.message || res.error || 'Something went wrong. Please contact us at support@instinctiq.com');
+                if (errorText) errorText.textContent = msg;
+                if (successText) successText.textContent = msg;
+                // кнопка остаётся скрытой
               } else if (httpStatus === 200) {
                 if (res.status === 'failed' || res.code === 'STAFF_CREATION_PARTIAL') {
-                  if (errorText) errorText.textContent = res.message || 'Some accounts were created with issues. Please contact us at support@instinctiq.com';
-                }
-                if (res['branch_name']) {
+                  var partialMsg = ensurePeriod(res.message || 'Some accounts were created with issues. Please contact us at support@instinctiq.com');
+                  if (errorText) errorText.textContent = partialMsg;
+                  if (successText) successText.textContent = partialMsg;
+                  // кнопка остаётся скрытой при частичном фейле
+                } else if (res['branch_name']) {
+                  // полный успех — показываем кнопку
                   var loginUrl = 'https://' + res['branch_name'] + '-instinctiq.talentlms.com/';
                   if (loginBtn) loginBtn.href = loginUrl;
                   if (successBtnWrap) successBtnWrap.style.display = '';
+                  if (successText) successText.textContent = 'We will create your staff accounts soon. If in 24 hours your team still can\'t log in, please contact us at';
                 }
               }
             })
