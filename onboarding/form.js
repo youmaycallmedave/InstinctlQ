@@ -337,10 +337,20 @@
     body: new URLSearchParams({ session_id: sessionId })
   })
     .then(function (response) {
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      return response.json();
+      return response.json().then(function (body) { return { ok: response.ok, body: body }; });
     })
-    .then(function (data) {
+    .then(function (result) {
+      if (!result.ok) {
+        var errMsg = result.body.message || result.body.error || '';
+        console.error('Webhook fetch failed:', result.body);
+        document.querySelectorAll('.payed-user-wait').forEach(function (el) { el.remove(); });
+        document.querySelectorAll('.payed-user').forEach(function (el) { el.remove(); });
+        document.querySelectorAll('.payed-user-denied').forEach(function (el) { el.classList.remove('hide'); });
+        var errorText = document.querySelector('.contact_error-text');
+        if (errorText && errMsg) errorText.textContent = errMsg;
+        return;
+      }
+      var data = result.body;
       console.log('Webhook response:', data);
 
       document.querySelectorAll('.payed-user-wait').forEach(el => el.remove());
@@ -406,15 +416,30 @@
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams(payload)
           })
-            .then(function (res) { return res.json(); })
             .then(function (res) {
+              var httpStatus = res.status;
+              return res.json().then(function (body) { return { httpStatus: httpStatus, body: body }; });
+            })
+            .then(function (result) {
+              var httpStatus = result.httpStatus;
+              var res = result.body;
               console.log('Form submit response:', res);
-              if (res['branch_name']) {
-                var loginUrl = 'https://' + res['branch_name'] + '-instinctiq.talentlms.com/';
-                var successBtnWrap = document.querySelector('.form_success-btn');
-                var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
-                if (loginBtn) loginBtn.href = loginUrl;
-                if (successBtnWrap) successBtnWrap.style.display = '';
+
+              var successBtnWrap = document.querySelector('.form_success-btn');
+              var loginBtn = successBtnWrap ? successBtnWrap.querySelector('a') : null;
+              var errorText = document.querySelector('.contact_error-text');
+
+              if (httpStatus === 502 || httpStatus === 500 || httpStatus === 422) {
+                if (errorText) errorText.textContent = res.message || res.error || 'Something went wrong. Please contact us at support@instinctiq.com';
+              } else if (httpStatus === 200) {
+                if (res.status === 'failed' || res.code === 'STAFF_CREATION_PARTIAL') {
+                  if (errorText) errorText.textContent = res.message || 'Some accounts were created with issues. Please contact us at support@instinctiq.com';
+                }
+                if (res['branch_name']) {
+                  var loginUrl = 'https://' + res['branch_name'] + '-instinctiq.talentlms.com/';
+                  if (loginBtn) loginBtn.href = loginUrl;
+                  if (successBtnWrap) successBtnWrap.style.display = '';
+                }
               }
             })
             .catch(function (err) { console.error('Form submit webhook failed:', err); });
