@@ -180,6 +180,30 @@
     return /[.!?]$/.test(text.trim()) ? text : text.trim() + '.';
   }
 
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function linkifyEmails(text) {
+    if (!text) return '';
+    var emailRegex = /[^\s@,]+@[^\s@,]+\.[^\s@,]{2,}/g;
+    var result = '';
+    var lastIndex = 0;
+    var match;
+    while ((match = emailRegex.exec(text)) !== null) {
+      result += escapeHtml(text.slice(lastIndex, match.index));
+      result += '<a href="mailto:' + match[0] + '" class="text-color-primary-deep text-style-link">' + match[0] + '</a>';
+      lastIndex = emailRegex.lastIndex;
+    }
+    result += escapeHtml(text.slice(lastIndex));
+    return result;
+  }
+
+  function setMsg(el, text) {
+    if (!el) return;
+    el.innerHTML = linkifyEmails(text);
+  }
+
   var earlyForm = document.getElementById('wf-form-Onboarding');
   if (earlyForm) {
     earlyForm.addEventListener('submit', function (e) {
@@ -440,7 +464,7 @@
         document.querySelectorAll('.payed-user').forEach(function (el) { el.remove(); });
         document.querySelectorAll('.payed-user-denied').forEach(function (el) { el.classList.remove('hide'); });
         var errorText = document.querySelector('.contact_error-text');
-        if (errorText && errMsg) errorText.textContent = ensurePeriod(errMsg);
+        if (errorText && errMsg) setMsg(errorText, ensurePeriod(errMsg));
         return;
       }
       var data = result.body;
@@ -501,7 +525,7 @@
         form.addEventListener('submit', function () {
           var successText = document.querySelector('.success-form-change');
           var successBtnWrap = document.querySelector('.form_success-btn');
-          if (successText) successText.textContent = 'Please wait, we\'re setting up your account...';
+          if (successText) setMsg(successText, 'Please wait, we\'re setting up your account...');
           if (successBtnWrap) successBtnWrap.style.display = 'none';
 
           var formData = new FormData(form);
@@ -530,21 +554,21 @@
 
               if (httpStatus === 502 || httpStatus === 500 || httpStatus === 422) {
                 var msg = ensurePeriod(res.message || res.error || 'Something went wrong. Please contact us at support@instinctiq.com');
-                if (errorText) errorText.textContent = msg;
-                if (successText) successText.textContent = msg;
+                setMsg(errorText, msg);
+                setMsg(successText, msg);
                 // кнопка остаётся скрытой
               } else if (httpStatus === 200) {
                 if (res.status === 'failed' || res.code === 'STAFF_CREATION_PARTIAL') {
                   var partialMsg = ensurePeriod(res.message || 'Some accounts were created with issues. Please contact us at support@instinctiq.com');
-                  if (errorText) errorText.textContent = partialMsg;
-                  if (successText) successText.textContent = partialMsg;
+                  setMsg(errorText, partialMsg);
+                  setMsg(successText, partialMsg);
                   // кнопка остаётся скрытой при частичном фейле
                 } else if (res['branch_name']) {
                   // полный успех — показываем кнопку
                   var loginUrl = 'https://' + res['branch_name'] + '-instinctiq.talentlms.com/';
                   if (loginBtn) loginBtn.href = loginUrl;
                   if (successBtnWrap) successBtnWrap.style.display = '';
-                  if (successText) successText.textContent = 'We will create your staff accounts soon. If in 24 hours your team still can\'t log in, please contact us at';
+                  setMsg(successText, 'We will create your staff accounts soon. If in 24 hours your team still can\'t log in, please contact us at');
                 }
               }
             })
