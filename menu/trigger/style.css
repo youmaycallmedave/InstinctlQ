@@ -12,8 +12,8 @@
     overflow: hidden;
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.9) rotate(-15deg);
-    transition: max-width 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+    transform: scale(0.9) rotate(-65deg);
+    transition: max-width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s, opacity 0.3s ease 0.3s, transform 0.9s ease;
   }
 
   .navbar1_menu-buttons.is-in {
@@ -21,17 +21,22 @@
     overflow: hidden;
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.9);
-    transition: max-width 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+    transition: max-width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s, opacity 0.4s ease 0s;
   }
 
-  .navbar1_component.is-active .navbar1_link-logo,
-  .navbar1_component.is-active .navbar1_menu-buttons.is-in {
-    max-width: 300px;
+  .navbar1_component.is-active .navbar1_link-logo {
+    max-width: var(--inner-width);
     opacity: 1;
     pointer-events: auto;
-    transform: scale(1);
-    transition: max-width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s, opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s;
+    transform: scale(1) rotate(0deg);
+    transition: max-width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s, opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s, transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s;
+  }
+
+  .navbar1_component.is-active .navbar1_menu-buttons.is-in {
+    max-width: var(--inner-width);
+    opacity: 1;
+    pointer-events: auto;
+    transition: max-width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s, opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s;
   }
 
    .navbar1_component.is-active .navbar1_menu-in {
