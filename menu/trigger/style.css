@@ -1,0 +1,41 @@
+@media (min-width: 992px) {
+  .navbar1_menu {
+    flex: 1 1 auto;
+  }
+  .navbar1_component.is-active .navbar1_menu {
+    flex: 0 0 auto;
+  }
+
+  /* Inner — скрыты по умолчанию */
+  .navbar1_link-logo {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9) rotate(-15deg);
+    transition: max-width 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .navbar1_menu-buttons.is-in {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+    transition: max-width 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .navbar1_component.is-active .navbar1_link-logo,
+  .navbar1_component.is-active .navbar1_menu-buttons.is-in {
+    max-width: 300px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+    transition: max-width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s, opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s;
+  }
+
+   .navbar1_component.is-active .navbar1_menu-in {
+     border-color: var(--_02-colors-semantic---border--border-secondary);
+   }
+    
+}
