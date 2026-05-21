@@ -507,8 +507,12 @@
 
   if (!sessionId) {
     document.querySelectorAll('.payed-user').forEach(el => el.classList.remove('hide'));
+    var waitBlock  = document.querySelector('.form_message-success-wait');
+    var readyBlock = document.querySelector('.form_message-success-ready');
+    if (waitBlock)  waitBlock.style.display = 'none';
+    if (readyBlock) readyBlock.style.display = '';
     var successText = document.querySelector('.success-form-change');
-    if (successText) successText.textContent = 'We will create your staff accounts soon. If in 24 hours your team still can\'t log in, please contact us at';
+    if (successText) setMsg(successText, 'We will create your staff accounts soon. If in 24 hours your team still can\'t log in, please contact us at support@instinctiq.com');
     var successBtn = document.querySelector('.form_success-btn');
     if (successBtn) successBtn.style.display = 'none';
     return;
