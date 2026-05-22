@@ -362,6 +362,7 @@
   document.head.appendChild(tabStyle);
 
   var savedCsvData = null;
+  var savedManualData = null;
 
   function resetManualList() {
     if (!list || !template) return;
@@ -385,16 +386,15 @@
     addFile.style.display = isActive ? 'block' : 'none';
 
     if (isActive) {
-      // Переход на CSV: сбрасываем ручной список, восстанавливаем сохранённые CSV данные
-      resetManualList();
+      // Переход на CSV: сохраняем ручные данные, восстанавливаем CSV
+      if (resultInput) savedManualData = resultInput.value || null;
       if (resultInput) resultInput.value = savedCsvData || '';
       addWrap.querySelectorAll('[required]').forEach(function (f) { f.dataset.wasRequired = 'true'; });
       addWrap.querySelectorAll('[data-was-required]').forEach(function (f) { f.removeAttribute('required'); });
     } else {
-      // Переход на ручной: сохраняем CSV данные, очищаем resultInput
+      // Переход на ручной: сохраняем CSV данные, восстанавливаем ручные
       if (resultInput) savedCsvData = resultInput.value || null;
-      resetManualList();
-      if (resultInput) resultInput.value = '';
+      if (resultInput) resultInput.value = savedManualData || '';
       addWrap.querySelectorAll('[data-was-required]').forEach(function (f) { f.setAttribute('required', ''); });
     }
     updateSubmitBtn();
