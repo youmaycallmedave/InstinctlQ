@@ -252,6 +252,13 @@
       }
       hideSubmitError();
     }, true);
+
+    earlyForm.addEventListener('input', function (e) {
+      if (!e.target.closest('.contact_add-group-list') && e.target !== resultInput) updateSubmitBtn();
+    });
+    earlyForm.addEventListener('change', function (e) {
+      if (!e.target.closest('.contact_add-group-list') && e.target !== resultInput) updateSubmitBtn();
+    });
   }
   // ========== FORM STAFF VALIDATION END ==========
 
