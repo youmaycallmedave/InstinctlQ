@@ -368,6 +368,7 @@
   tabStyle.textContent = '.contact_add-file { display: none; }';
   document.head.appendChild(tabStyle);
 
+  /* TEMPORARILY DISABLED — uncomment to restore CSV tab + file upload
   var savedCsvData = null;
   var savedManualData = null;
 
@@ -406,9 +407,10 @@
     }
     updateSubmitBtn();
   });
+  */
   // ========== TABS TOGGLE END ==========
 
-  // ========== FILE PARSER (CSV / XLS / XLSX) ==========
+  /* ========== FILE PARSER (CSV / XLS / XLSX) — TEMPORARILY DISABLED ==========
   var csvFileInput = document.querySelector('.contact_add-file .w-file-upload-input')
                   || document.querySelector('.contact_add-file input[type="file"]');
 
@@ -506,7 +508,7 @@
       }
     });
   }
-  // ========== FILE PARSER END ==========
+  ========== FILE PARSER END ========== */
 
   // ========== SESSION ==========
   const params = new URLSearchParams(window.location.search);
