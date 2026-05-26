@@ -92,17 +92,23 @@
             progressIn.classList.add("is-animating");
         }
 
+        const CSS_DURATION = 500; // must match CSS transition-duration on slides
+
         function go(delta) {
             if (animating) return;
+
+            // Lazy reposition: jump to real zone synchronously before next animation
+            // so the browser never paints the intermediate clone position
+            const real = toReal(cur);
+            if (real !== cur) silentJump(real);
+
             animating = true;
             moveTo(cur + delta, true);
             resetProgress();
             clearTimeout(animTimeout);
             animTimeout = setTimeout(() => {
-                const real = toReal(cur);
-                if (real !== cur) silentJump(real);
                 animating = false;
-            }, SPEED);
+            }, CSS_DURATION);
         }
 
         function startAutoplay() {
@@ -156,12 +162,15 @@
         container.addEventListener("mousedown", (e) => {
             mouseDown = true;
             clearTimeout(animTimeout);
-            cur = toReal(cur);
-            setActive(cur);
+            animating = false;
+            // Normalize track position to real zone before drag starts,
+            // otherwise mouseStartOffset captures a clone offset and
+            // mouseup animates from clone territory back to real — visible jump
+            const real = toReal(cur);
+            if (real !== cur) silentJump(real);
             const frozen = getLiveOffset();
             track.style.transition = "none";
             track.style.transform = `translateX(${frozen}px)`;
-            animating = false;
             mouseStartX = e.clientX;
             mouseStartOffset = frozen;
             clearInterval(autoTimer);
