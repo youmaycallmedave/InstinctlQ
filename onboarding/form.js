@@ -1,8 +1,8 @@
 (function () {
   const PLAN_LIMITS = {
-    'Small (1-15 staff)':   15,
-    'Medium (16-30 staff)': 30,
-    'Large (31–50 staff)':  50,
+    'Small (1-15 users)':   15,
+    'Medium (16-30 users)': 30,
+    'Large (31–50 users)':  50,
   };
 
   // ========== STYLES ==========
