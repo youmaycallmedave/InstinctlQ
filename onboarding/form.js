@@ -569,10 +569,11 @@
         var field = document.getElementById(entry[0]);
         if (!field || !entry[1]) return;
         if (field.tagName === 'SELECT') {
-          var val = entry[1].toLowerCase();
-          var match = Array.from(field.options).find(function (opt) {
-            return opt.value.toLowerCase().indexOf(val) === 0 || val.indexOf(opt.value.toLowerCase()) === 0;
-          });
+          var val = (entry[1] || '').toLowerCase();
+          var keyword = ['small', 'medium', 'large'].find(function (k) { return val.indexOf(k) !== -1; });
+          var match = keyword
+            ? Array.from(field.options).find(function (opt) { return opt.value.toLowerCase().indexOf(keyword) !== -1; })
+            : null;
           if (match) field.value = match.value;
         } else {
           field.value = entry[1];
