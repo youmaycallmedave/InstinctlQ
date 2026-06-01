@@ -5,6 +5,12 @@
     'Large (31–50 users)':  50,
   };
 
+  const PAYMENT_LINK_PLANS = {
+    'plink_1TZeI5L49Y1cjGslPlnAK5bO': 'small',
+    'plink_1TZeI8L49Y1cjGslSi03EORm': 'medium',
+    'plink_1TZeI9L49Y1cjGslr8J6tMXk': 'large',
+  };
+
   // ========== STYLES ==========
   var style = document.createElement('style');
   style.textContent = [
@@ -562,7 +568,7 @@
         'Last-name': data['lastName'],
         'Email': data['email'],
         'business-facility-name': data['businessName'],
-        'Selected-plan': data['plan']
+        'Selected-plan': PAYMENT_LINK_PLANS[data['payment_link']] || data['plan']
       };
 
       Object.entries(readonlyFields).forEach(function (entry) {
